@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql");
+const Ghost = require("./ghost");
 
 const app = express();
 app.use(cors());
@@ -51,14 +52,14 @@ app.get("/",(req,res) => {
 
 
 //              checks if user exists in out 'Users' database(is our user.).           //
-app.get("/exists",(req,res) => {
+app.get("/unique-username",(req,res) => {
     
-    //          request: 'localhost:3000/exists?username=...&password=....'         //
+    //          request: 'localhost:3000/unique-username?username=...&password=....'         //
     const {username , password} = req.query;
-    let registeredBefore = false;
+    // let registeredBefore = false;
 
         //              checking that user has been registered before or no ?           //
-        connection.query("SELECT COUNT(*) as founds FROM Users WHERE (Username = '" + username + "');", (err,results,fields) => {
+        connection.query("SELECT COUNT(Username) as founds FROM Users WHERE (Username = '" + username + ");", (err,results,fields) => {
             if(err){
                 throw err;
             }
@@ -77,6 +78,20 @@ app.get("/exists",(req,res) => {
             }
         });
 });
+
+
+app.get("/exists",(req,res) => {
+
+    const {username , password} = req.query;
+
+    connection.query("SELECT COUNT(*) as founds from Users where ( Username = '" + username + "' and Password = '" + password + "');",(err,results) => {
+
+        let founds = results[0].founds;
+
+    });
+
+});
+
 
 app.get("/signup", (req,res) => {
 
@@ -230,7 +245,7 @@ app.get("/login/start-bots",(req,res) => {
             initialInfo = {
                 userName: results[i].instaUser,
                 Password: results[i].instaPass,
-                hashTag: hashtag,
+                hashTag: "#" + hashtag,
                 pageCount: pgcount,
                 Comment: "@tourist_experience"
             }
@@ -238,7 +253,7 @@ app.get("/login/start-bots",(req,res) => {
             activeBots.set({
                 userName: username,
                 index: Ids[i]
-            },new Ghost(initialInfo,false));
+            },new Ghost(initialInfo,true));
         }
 
         tmpItr = activeBots.values();
